@@ -13,7 +13,7 @@ TRADING_DAYS = 252
 SENTIMENT_ADJUSTMENT = 0.02
 NEWS_API_KEY = ""
 
-st.set_page_config(page_title="CAPM", page_icon="📈", layout='wide')
+st.set_page_config(page_title="CAPM", page_icon="", layout='wide')
 st.title("Capital Asset Pricing Model (CAPM)")
 
 spacy_nlp = spacy.load("en_core_web_sm")
@@ -87,7 +87,7 @@ def adjust_return_by_sentiment(stock, expected_return):
     adjusted_return = np.clip(expected_return + adjustment, 0, 1)
     return adjusted_return
 
-apply_sentiment = st.checkbox("🧠 Apply AI-Based Sentiment Adjustment to Expected Returns")
+apply_sentiment = st.checkbox("Apply AI-Based Sentiment Adjustment to Expected Returns")
 
 results = []
 for stock in selected_stocks:
@@ -102,7 +102,7 @@ for stock in selected_stocks:
 
 results_df = pd.DataFrame(results)
 
-st.subheader("💬 Ask a Smart Question About Your Stocks")
+st.subheader("Ask a Smart Question About Your Stocks")
 q = st.text_input("Ask a question (e.g. 'What is the safest stock to invest in?')")
 
 def keyword_lemmas(query):
@@ -114,22 +114,22 @@ if not results_df.empty and q:
     def contains(*words): return any(word in lemmas for word in words)
     if contains("high", "top") and contains("return", "performance"):
         best = results_df.iloc[results_df['Expected Return'].idxmax()]
-        st.info(f"📈 {best['Stock']} has the highest expected return of {best['Expected Return']:.2%}.")
+        st.info(f"{best['Stock']} has the highest expected return of {best['Expected Return']:.2%}.")
     elif contains("low", "least") and contains("return", "performance"):
         worst = results_df.iloc[results_df['Expected Return'].idxmin()]
-        st.info(f"📉 {worst['Stock']} has the lowest expected return of {worst['Expected Return']:.2%}.")
+        st.info(f"{worst['Stock']} has the lowest expected return of {worst['Expected Return']:.2%}.")
     elif contains("low", "least", "safe") and contains("risk", "beta"):
         safest = results_df.iloc[results_df['Beta'].idxmin()]
-        st.info(f"🛡️ {safest['Stock']} has the lowest beta ({safest['Beta']:.2f}), indicating lower risk.")
+        st.info(f"{safest['Stock']} has the lowest beta ({safest['Beta']:.2f}), indicating lower risk.")
     elif contains("high", "most") and contains("risk", "beta", "volatile"):
         riskiest = results_df.iloc[results_df['Beta'].idxmax()]
-        st.info(f"⚠️ {riskiest['Stock']} has the highest beta ({riskiest['Beta']:.2f}), indicating high volatility.")
+        st.info(f"{riskiest['Stock']} has the highest beta ({riskiest['Beta']:.2f}), indicating high volatility.")
     elif contains("show", "list", "all"):
         st.write(results_df)
     else:
-        st.warning("🤖 I couldn't understand your question. Try asking about return or beta.")
+        st.warning("I couldn't understand your question. Try asking about return or beta.")
 
-st.write("## CAPM Results", results_df)
+st.write("CAPM Results", results_df)
 
 st.subheader("Stock Prices Over Time")
 st.line_chart(stocks_data)
@@ -142,7 +142,7 @@ st.write(stocks_returns.corr())
 
 selected_sentiment_stock = st.selectbox("Choose a stock for sentiment analysis", selected_stocks)
 if selected_sentiment_stock:
-    st.write(f"🔍 Fetching news for **{selected_sentiment_stock}**...")
+    st.write(f"Fetching news for {selected_sentiment_stock}...")
     headlines = fetch_news_headlines(selected_sentiment_stock)
     if not headlines:
         st.warning("No news headlines found.")
@@ -151,12 +151,12 @@ if selected_sentiment_stock:
         sentiment_scores = {"POSITIVE": 0, "NEGATIVE": 0}
         for i, result in enumerate(sentiments):
             sentiment_scores[result['label']] += result['score']
-            st.markdown(f"**{headlines[i]}** → *{result['label']} ({result['score']:.2f})*")
+            st.markdown(f"{headlines[i]} → {result['label']} ({result['score']:.2f})")
         net_score = sentiment_scores["POSITIVE"] - sentiment_scores["NEGATIVE"]
-        st.write("### 🧾 Sentiment Summary")
+        st.write("Sentiment Summary")
         if net_score > 0.3:
-            st.success("Overall sentiment is **positive**.")
+            st.success("Overall sentiment is positive.")
         elif net_score < -0.3:
-            st.error("Overall sentiment is **negative**.")
+            st.error("Overall sentiment is negative.")
         else:
-            st.info("Overall sentiment is **neutral**.")
+            st.info("Overall sentiment is neutral.")
